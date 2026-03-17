@@ -18,8 +18,16 @@ build/
 
 # Datasets & training runs
 datasets/
-data/
+data/*
+!data/samples/
+!data/samples/.gitkeep
 runs/
+
+# Experiment results
+experiments/*
+!experiments/README.md
+!experiments/.gitkeep
+outputs/
 
 # IDE & editor
 .idea/
