@@ -1,0 +1,39 @@
+[project]
+name = "watch-tower"
+version = "0.1.0"
+description = "건설 현장 실시간 AI 안전 모니터링 시스템"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "ultralytics",
+    "supervision",
+    "opencv-python-headless",
+    "huggingface-hub",
+    "torch",
+    "torchvision",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "ruff",
+    "ipykernel",
+]
+
+[tool.uv]
+index-url = "https://download.pytorch.org/whl/cu121"
+extra-index-url = ["https://pypi.org/simple"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/watch_tower"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py312"
+src = ["src"]

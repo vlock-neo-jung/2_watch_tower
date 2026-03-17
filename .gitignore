@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Virtual environment
+.venv/
+
+# Deep learning models & weights
+*.pt
+*.pth
+*.onnx
+*.engine
+*.tflite
+
+# Datasets & training runs
+datasets/
+data/
+runs/
+
+# IDE & editor
+.idea/
+# .vscode/
+
+# Environment & secrets
+.env
+.env.*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Logs & temp
+*.log
+tmp/
