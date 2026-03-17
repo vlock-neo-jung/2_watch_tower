@@ -34,3 +34,4 @@
 
 - [00.phase2-person-detection-tracking.md](report/00.phase2-person-detection-tracking.md) — Phase 2 종합: Person Detection + Tracking 검증 결과
 - [01.small-object-detection-improvements.md](report/01.small-object-detection-improvements.md) — 소형 객체 탐지 개선 시도: SAHI, 고해상도, VisDrone 모델
+- [02.soda-benchmark-results.md](report/02.soda-benchmark-results.md) — SODA 대규모 벤치마크: 1,984장/7,399명 기준 모델 비교 확정
