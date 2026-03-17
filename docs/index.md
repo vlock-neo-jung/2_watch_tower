@@ -28,3 +28,4 @@
 
 - [dev-environment.md](references/dev-environment.md) — 개발 환경 설정 및 검증 결과
 - [pc-speck.md](references/pc-speck.md) — 개발 머신 하드웨어 스펙
+- [detection-metrics.md](references/detection-metrics.md) — Object Detection 평가 수치 가이드

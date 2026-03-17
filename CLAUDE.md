@@ -17,4 +17,9 @@ docs/
 
 새 문서 생성 시 `docs/index.md`에 링크를 추가할 것.
 
+## Linear
+
+- Team: FWY
+- Project: WatchTower (`watchtower-f6ee3203fb62`)
+
 @AGENTS.md
