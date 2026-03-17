@@ -1,0 +1,7 @@
+{
+  "name": "tessl/pypi-roboflow",
+  "version": "1.2.0",
+  "docs": "docs/index.md",
+  "describes": "pkg:pypi/roboflow@1.2.7",
+  "summary": "Official Python package for working with the Roboflow computer vision platform API"
+}

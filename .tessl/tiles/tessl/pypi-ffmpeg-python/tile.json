@@ -1,0 +1,7 @@
+{
+  "name": "tessl/pypi-ffmpeg-python",
+  "version": "0.2.0",
+  "docs": "docs/index.md",
+  "describes": "pkg:pypi/ffmpeg-python@0.2.0",
+  "summary": "Python bindings for FFmpeg with complex filtering support for video and audio processing"
+}

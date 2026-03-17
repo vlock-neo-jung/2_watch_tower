@@ -1,0 +1,7 @@
+{
+  "name": "tessl/pypi-shapely",
+  "version": "2.1.0",
+  "docs": "docs/index.md",
+  "describes": "pkg:pypi/shapely@2.1.1",
+  "summary": "Manipulation and analysis of geometric objects in the Cartesian plane"
+}

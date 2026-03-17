@@ -1,0 +1,7 @@
+{
+  "name": "tessl/pypi-supervision",
+  "version": "0.26.0",
+  "docs": "docs/index.md",
+  "describes": "pkg:pypi/supervision@0.26.1",
+  "summary": "A set of easy-to-use utils that will come in handy in any Computer Vision project"
+}

@@ -1,0 +1,7 @@
+{
+  "name": "tessl/pypi-ultralytics",
+  "version": "8.3.0",
+  "docs": "docs/index.md",
+  "describes": "pkg:pypi/ultralytics@8.3.38",
+  "summary": "Ultralytics YOLO for state-of-the-art object detection, multi-object tracking, instance segmentation, pose estimation and image classification."
+}

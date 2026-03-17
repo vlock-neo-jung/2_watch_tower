@@ -1,0 +1,7 @@
+{
+  "name": "tessl/pypi-numpy",
+  "version": "2.3.0",
+  "docs": "docs/index.md",
+  "describes": "pkg:pypi/numpy@2.3.2",
+  "summary": "Fundamental package for array computing in Python"
+}

@@ -1,0 +1,8 @@
+{
+  "name": "tessl/pypi-opencv-python",
+  "version": "4.12.1",
+  "docs": "docs/index.md",
+  "describes": "pkg:pypi/opencv-python@4.12.0.88",
+  "summary": "Pre-built Python bindings for OpenCV, the comprehensive open-source computer vision and image processing library with 2500+ algorithms",
+  "private": false
+}

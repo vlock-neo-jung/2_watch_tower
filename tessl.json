@@ -1,0 +1,30 @@
+{
+  "name": "my-project",
+  "mode": "vendored",
+  "dependencies": {
+    "tessl/pypi-ultralytics": {
+      "version": "8.3.0"
+    },
+    "tessl/pypi-opencv-python": {
+      "version": "4.12.1"
+    },
+    "tessl/pypi-supervision": {
+      "version": "0.26.0"
+    },
+    "tessl/pypi-numpy": {
+      "version": "2.3.0"
+    },
+    "tessl/pypi-shapely": {
+      "version": "2.1.0"
+    },
+    "tessl/pypi-ffmpeg-python": {
+      "version": "0.2.0"
+    },
+    "tessl/pypi-roboflow": {
+      "version": "1.2.0"
+    },
+    "tessl/pypi-cuda-python": {
+      "version": "13.0.0"
+    }
+  }
+}
