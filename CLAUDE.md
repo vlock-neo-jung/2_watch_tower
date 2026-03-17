@@ -10,7 +10,8 @@ docs/
 ├── getting-started.md    # 설치 및 실행 가이드
 ├── architecture.md       # 시스템 아키텍처
 ├── concepts/             # 개념 문서 (요구사항, 설계 결정 등)
-│   └── overview.md       # 프로젝트 개요 및 요구사항 정의서
+│   ├── overview.md       # 프로젝트 개요 및 요구사항 정의서
+│   └── roadmap.md        # 1차 로드맵 (개발환경 → 모델검증 → 통합)
 ├── research/             # 리서치 및 기술 조사
 │   ├── ppe-detection.md
 │   ├── fall-detection.md
