@@ -19,6 +19,8 @@ from watch_tower.config import MODELS_DIR
 GT_IMAGES = Path("/home/neo/share/watch-tower_data/ground_truth/images")
 GT_LABELS = Path("/home/neo/share/watch-tower_data/ground_truth/labels")
 
+SODA_PERSON_MODEL = MODELS_DIR / "yolo11m-soda-person.pt"
+
 MODELS = {
     "hazard (0.25)": (MODELS_DIR / "yolo11m-construction-hazard.pt", {"Person"}, 0.25),
     "hazard (0.15)": (MODELS_DIR / "yolo11m-construction-hazard.pt", {"Person"}, 0.15),
@@ -27,6 +29,11 @@ MODELS = {
     "VisDrone (0.15)": (MODELS_DIR / "yolov8m-visdrone.pt", {"pedestrian", "people"}, 0.15),
     "VisDrone (0.10)": (MODELS_DIR / "yolov8m-visdrone.pt", {"pedestrian", "people"}, 0.10),
 }
+
+# 파인튜닝 모델이 있으면 추가
+if SODA_PERSON_MODEL.exists():
+    MODELS["SODA-ft (0.25)"] = (SODA_PERSON_MODEL, {"person"}, 0.25)
+    MODELS["SODA-ft (0.15)"] = (SODA_PERSON_MODEL, {"person"}, 0.15)
 
 
 def load_gt_boxes(label_path: Path, img_w: int, img_h: int) -> np.ndarray:
