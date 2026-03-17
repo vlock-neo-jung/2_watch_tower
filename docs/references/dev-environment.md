@@ -49,17 +49,29 @@
 ## 5. 프로젝트 구조
 
 ```
-watch-tower/
-├── .python-version          # 3.12
-├── pyproject.toml           # 의존성, 빌드, 도구 설정
+watch-tower/                          ← git repo (코드만)
+├── .python-version
+├── pyproject.toml
 ├── src/watch_tower/
 │   ├── __init__.py
-│   ├── detection/           # 객체 감지 모듈
-│   └── utils/               # 공통 유틸리티
-├── tests/                   # (FWY-44에서 구성)
-├── docs/                    # 문서
-└── .venv/                   # 가상환경 (gitignore)
+│   ├── config.py                     # DATA_ROOT 환경변수 기반 경로 관리
+│   ├── detection/
+│   └── utils/
+├── scripts/                          # 실행 스크립트
+├── tests/
+├── models/README.md                  # 모델 목록 문서 (가중치는 외부)
+├── docs/
+└── .venv/                            # 가상환경 (gitignore)
+
+/home/neo/share/watch-tower_data/     ← 대용량 데이터 (프로젝트 외부)
+├── samples/                          # PoC 영상/이미지
+├── models/                           # 모델 가중치
+├── outputs/                          # 추론 결과
+├── dataset/                          # ultralytics 데이터셋
+└── experiments/                      # 실험 결과
 ```
+
+경로 설정: 환경변수 `WATCH_TOWER_DATA_ROOT` (기본값: `/home/neo/share/watch-tower_data`)
 
 ## 6. 환경 설정 방법
 

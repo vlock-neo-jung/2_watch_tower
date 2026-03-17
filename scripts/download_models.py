@@ -7,7 +7,7 @@ from pathlib import Path
 
 from huggingface_hub import hf_hub_download
 
-MODELS_DIR = Path(__file__).resolve().parent.parent / "models"
+from watch_tower.config import MODELS_DIR
 
 MODELS = [
     {
@@ -32,9 +32,7 @@ def download_all() -> None:
             repo_id=model["repo_id"],
             filename=model["filename"],
             local_dir=MODELS_DIR,
-            local_dir_use_symlinks=False,
         )
-        # HuggingFace 캐시 구조에서 실제 파일을 프로젝트 이름으로 복사
         downloaded_path = Path(downloaded)
         if downloaded_path != local_path:
             downloaded_path.rename(local_path)

@@ -1,7 +1,8 @@
 # 모델 가중치
 
-이 디렉토리에는 모델 가중치 파일(.pt, .onnx, .engine)이 저장된다.
-가중치 파일은 .gitignore에 의해 추적되지 않으며, 다운로드 스크립트로 재현 가능하다.
+모델 가중치 파일은 프로젝트 외부 데이터 디렉토리에 저장된다.
+기본 경로: `/home/neo/share/watch-tower_data/models/`
+(환경변수 `WATCH_TOWER_DATA_ROOT`로 변경 가능)
 
 ## 다운로드
 
