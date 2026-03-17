@@ -18,6 +18,7 @@ dev = [
     "pytest-cov",
     "ruff",
     "ipykernel",
+    "yt-dlp",
 ]
 
 [tool.uv]
