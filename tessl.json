@@ -25,6 +25,12 @@
     },
     "tessl/pypi-cuda-python": {
       "version": "13.0.0"
+    },
+    "maria/fastapi": {
+      "version": "0.1.0"
+    },
+    "tessl/npm-tailwindcss--vite": {
+      "version": "4.1.0"
     }
   }
 }
