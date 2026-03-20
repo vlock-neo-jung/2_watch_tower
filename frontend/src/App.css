@@ -1,0 +1,85 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #111;
+  color: #eee;
+  font-family: system-ui, sans-serif;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  background: #1a1a2e;
+  border-bottom: 1px solid #333;
+  gap: 12px;
+}
+
+.header-left {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.mode-select,
+.video-select {
+  padding: 6px 10px;
+  background: #2a2a3e;
+  color: #eee;
+  border: 1px solid #444;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.header-btn {
+  padding: 6px 12px;
+  background: #2a2a3e;
+  color: #eee;
+  border: 1px solid #444;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.header-btn:hover {
+  background: #3a3a4e;
+}
+
+.main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.video-area {
+  flex: 1;
+  padding: 8px;
+  overflow: auto;
+}
+
+.side-panel {
+  width: 220px;
+  padding: 12px;
+  border-left: 1px solid #333;
+  background: #1a1a1a;
+  overflow-y: auto;
+}
+
+.side-panel h3 {
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: #aaa;
+}
+
+.bottom-panel {
+  padding: 12px 16px;
+  border-top: 1px solid #333;
+  background: #1a1a1a;
+  min-height: 60px;
+}
+
+.placeholder {
+  color: #666;
+  font-size: 13px;
+}

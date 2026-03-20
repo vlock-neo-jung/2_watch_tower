@@ -1,0 +1,128 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.timeline {
+  padding: 0 4px;
+}
+
+.timelineBar {
+  position: relative;
+  height: 20px;
+  background: #2a2a2a;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.eventBlock {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  opacity: 0.8;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.eventBlock:hover {
+  opacity: 1;
+}
+
+.playhead {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: 100%;
+  background: #fff;
+  pointer-events: none;
+}
+
+.markingRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn {
+  padding: 5px 12px;
+  background: #2a2a3e;
+  color: #eee;
+  border: 1px solid #444;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.btn:hover {
+  background: #3a3a4e;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.btnActive {
+  background: #5e2a2a !important;
+  border-color: #f44 !important;
+  color: #faa !important;
+}
+
+.markingInfo {
+  color: #f88;
+  font-size: 12px;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0.5; }
+}
+
+.eventCount {
+  margin-left: auto;
+  color: #888;
+  font-size: 12px;
+}
+
+.eventList {
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.table th {
+  text-align: left;
+  color: #888;
+  padding: 4px 8px;
+  border-bottom: 1px solid #333;
+  font-weight: normal;
+}
+
+.table td {
+  padding: 4px 8px;
+  color: #ccc;
+}
+
+.eventRow {
+  cursor: pointer;
+}
+
+.eventRow:hover {
+  background: #2a2a2a;
+}
+
+.deleteBtn {
+  padding: 2px 6px;
+  background: #3e2a2a;
+  color: #f88;
+  border: 1px solid #644;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 11px;
+}
