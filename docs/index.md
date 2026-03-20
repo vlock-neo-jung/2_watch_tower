@@ -29,6 +29,7 @@
 - [dev-environment.md](references/dev-environment.md) — 개발 환경 설정 및 검증 결과
 - [pc-speck.md](references/pc-speck.md) — 개발 머신 하드웨어 스펙
 - [detection-metrics.md](references/detection-metrics.md) — Object Detection 평가 수치 가이드
+- [models-and-datasets.md](references/models-and-datasets.md) — 모델 및 데이터셋 현황
 
 ## report/ — 검증 리포트
 
@@ -36,3 +37,4 @@
 - [01.small-object-detection-improvements.md](report/01.small-object-detection-improvements.md) — 소형 객체 탐지 개선 시도: SAHI, 고해상도, VisDrone 모델
 - [02.soda-benchmark-results.md](report/02.soda-benchmark-results.md) — SODA 대규모 벤치마크: 1,984장/7,399명 기준 모델 비교 확정
 - [03.sahi-coco-benchmark.md](report/03.sahi-coco-benchmark.md) — SAHI + COCO 조합: Recall 36.7%→57.8% (+21%p)
+- [04.soda-finetune-benchmark.md](report/04.soda-finetune-benchmark.md) — SODA 파인튜닝: SODA 도메인 Recall 84.1%, 건설현장 도메인 한계 확인
