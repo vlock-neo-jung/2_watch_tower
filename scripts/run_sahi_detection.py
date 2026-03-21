@@ -172,11 +172,13 @@ def main() -> None:
     args = parser.parse_args()
 
     model_path = Path(args.model)
-    output_dir = Path(args.output)
+    model_name = model_path.stem
+    output_dir = Path(args.output) / model_name
     use_sahi = not args.no_sahi
 
     print(f"모델: {model_path.name}")
     print(f"입력: {args.source}")
+    print(f"출력: {output_dir}")
     print(f"신뢰도: {args.conf}")
 
     model = create_model(model_path, args.conf)

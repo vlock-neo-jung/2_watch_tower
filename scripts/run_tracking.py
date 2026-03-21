@@ -25,10 +25,12 @@ PERSON_CLASS_INDEX = 5  # yolo11m-construction-hazard의 Person 클래스
 
 
 def run(source: str, model_path: Path, output_dir: Path, conf: float) -> None:
-    output_dir.mkdir(parents=True, exist_ok=True)
+    model_name = model_path.stem
+    model_output_dir = output_dir / model_name
+    model_output_dir.mkdir(parents=True, exist_ok=True)
 
     source_name = Path(source).stem
-    output_path = output_dir / f"{source_name}_tracked.mp4"
+    output_path = model_output_dir / f"{source_name}_tracked.mp4"
 
     model = YOLO(str(model_path))
 
@@ -43,7 +45,7 @@ def run(source: str, model_path: Path, output_dir: Path, conf: float) -> None:
     print(f"모델: {model_path.name}")
     print(f"입력: {source}")
     print(f"해상도: {w}x{h}, FPS: {fps:.1f}, 프레임: {total_frames}")
-    print(f"출력: {output_path}")
+    print(f"출력: {output_path} ({model_name}/)")
     print(f"신뢰도 임계값: {conf}")
     print()
 

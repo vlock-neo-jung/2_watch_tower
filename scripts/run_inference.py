@@ -19,11 +19,13 @@ DEFAULT_MODEL = MODELS_DIR / "yolo11m-construction-hazard.pt"
 
 
 def run(source: str, model_path: Path, output_dir: Path, conf: float) -> None:
-    output_dir.mkdir(parents=True, exist_ok=True)
+    model_name = model_path.stem
+    model_output_dir = output_dir / model_name
+    model_output_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"모델: {model_path}")
     print(f"입력: {source}")
-    print(f"출력: {output_dir}")
+    print(f"출력: {model_output_dir}")
     print()
 
     model = YOLO(str(model_path))
@@ -32,7 +34,7 @@ def run(source: str, model_path: Path, output_dir: Path, conf: float) -> None:
         device="cuda",
         conf=conf,
         save=True,
-        project=str(output_dir),
+        project=str(model_output_dir),
         name="inference",
         exist_ok=True,
     )
