@@ -14,6 +14,11 @@
 
 새 문서 생성 시 `docs/index.md`에 링크를 추가할 것.
 
+## 설계 스펙
+
+`openspec/specs/` — 모듈별 구현 스펙 (API 인터페이스, 모델 구조, 입출력 포맷 등). 프로젝트 현황이나 설계 의도 파악 시 여기를 먼저 참조할 것.
+`openspec/changes/archive/` — 완료된 change 이력 (proposal → design → specs → tasks).
+
 ## 데이터 경로
 
 대용량 데이터는 프로젝트 외부에 위치. `src/watch_tower/config.py`에서 관리.
