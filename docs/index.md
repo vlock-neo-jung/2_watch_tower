@@ -38,3 +38,5 @@
 - [02.soda-benchmark-results.md](report/02.soda-benchmark-results.md) — SODA 대규모 벤치마크: 1,984장/7,399명 기준 모델 비교 확정
 - [03.sahi-coco-benchmark.md](report/03.sahi-coco-benchmark.md) — SAHI + COCO 조합: Recall 36.7%→57.8% (+21%p)
 - [04.soda-finetune-benchmark.md](report/04.soda-finetune-benchmark.md) — SODA 파인튜닝: SODA 도메인 Recall 84.1%, 건설현장 도메인 한계 확인
+- [05.visual-model-comparison.md](report/05.visual-model-comparison.md) — 모델별 영상 육안 비교: hazard가 건설현장에서 최선, SODA-ft 부적합 확인
+- [06.ppe-detection.md](report/06.ppe-detection.md) — PPE 감지 검증 및 Zone×PPE 결합 로직: NO-Hardhat 탐지 한계 확인, 이중 판정 방식 프로토타입 구현
