@@ -44,7 +44,7 @@
 | 2 | PyTorch cu128 | 설계 시 cu121 목표였으나 uv가 PyPI에서 최신 호환 빌드 설치. GPU 동작 정상 확인 |
 | 3 | uv 인덱스 통합 | pyproject.toml [tool.uv]에 PyTorch CUDA 인덱스 설정. `uv sync` 한 번으로 완결 |
 | 4 | 의존성 2그룹 | core+gpu 통합 / dev 분리. 항상 GPU 사용하는 1인 개발 환경에 적합 |
-| 5 | src layout | src/watch_tower/ 구조. 모듈은 필요할 때 추가 (현재: detection/, utils/) |
+| 5 | src layout | src/watch_tower/ 구조. 모듈은 필요할 때 추가 (현재: detection/, zone/, ppe/, utils/) |
 
 ## 5. 프로젝트 구조
 
@@ -55,11 +55,14 @@ watch-tower/                          ← git repo (코드만)
 ├── src/watch_tower/
 │   ├── __init__.py
 │   ├── config.py                     # DATA_ROOT 환경변수 기반 경로 관리
-│   ├── detection/
+│   ├── detection/                    # 객체 검출 공통
+│   ├── zone/                         # 위험구역 침입 감지, 인원 카운팅
+│   ├── ppe/                          # PPE 착용 감지, Zone×PPE 결합 로직
 │   └── utils/
-├── scripts/                          # 실행 스크립트
+├── scripts/                          # 추론/학습/벤치마크 스크립트
 ├── tests/
-├── models/README.md                  # 모델 목록 문서 (가중치는 외부)
+├── frontend/                         # React 어노테이션 도구
+├── openspec/                         # 모듈별 설계 스펙 및 change 이력
 ├── docs/
 └── .venv/                            # 가상환경 (gitignore)
 
@@ -68,7 +71,8 @@ watch-tower/                          ← git repo (코드만)
 ├── models/                           # 모델 가중치
 ├── outputs/                          # 추론 결과
 ├── dataset/                          # ultralytics 데이터셋
-└── experiments/                      # 실험 결과
+├── ground_truth/                     # 자체 구축 건설현장 GT
+└── experiments/                      # 학습 로그, 벤치마크 결과
 ```
 
 경로 설정: 환경변수 `WATCH_TOWER_DATA_ROOT` (기본값: `/home/neo/share/watch-tower_data`)

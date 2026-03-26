@@ -1,16 +1,23 @@
 # Watch Tower 문서 목차
 
-## 시작하기
+## roadmap/ — 마일스톤, 로드맵
 
-- [getting-started.md](getting-started.md) — 설치 및 실행 가이드
-- [architecture.md](architecture.md) — 시스템 아키텍처
+- [00-setup.md](roadmap/00-setup.md) — 1차 로드맵 (개발환경 → 모델검증 → 통합)
 
-## concepts/ — 요구사항, 설계 결정
+## product/ — 제품 오버뷰, 핵심 도메인 규칙
 
-- [overview.md](concepts/overview.md) — 프로젝트 개요 및 요구사항 정의서
-- [roadmap.md](concepts/roadmap.md) — 1차 로드맵 (개발환경 → 모델검증 → 통합)
+- [overview.md](product/overview.md) — 프로젝트 개요 및 요구사항 정의서
 
-## research/ — 기술 조사, 벤치마크
+## references/ — 아키텍처, 인프라, 셋업, API 등 개발자 참고 문서
+
+- [architecture.md](references/architecture.md) — 시스템 아키텍처
+- [getting-started.md](references/getting-started.md) — 설치 및 실행 가이드
+- [dev-environment.md](references/dev-environment.md) — 개발 환경 설정 및 검증 결과
+- [pc-speck.md](references/pc-speck.md) — 개발 머신 하드웨어 스펙
+- [detection-metrics.md](references/detection-metrics.md) — Object Detection 평가 수치 가이드
+- [models-and-datasets.md](references/models-and-datasets.md) — 모델 및 데이터셋 현황
+
+## research/ — 기술 비교, 라이브러리 평가, 설계 대안 분석
 
 - [ppe-detection.md](research/ppe-detection.md) — PPE 감지 리서치
 - [ppe-detection-technical.md](research/ppe-detection-technical.md) — PPE 감지 기술 상세
@@ -23,13 +30,6 @@
 - [comparison-recommendation.md](research/comparison-recommendation.md) — 상용 솔루션 비교 및 Build vs Buy
 - [research_01.md](research/research_01.md) — 리서치 노트 1
 - [research_02.md](research/research_02.md) — 리서치 노트 2
-
-## references/ — 외부 참조, 환경 설정
-
-- [dev-environment.md](references/dev-environment.md) — 개발 환경 설정 및 검증 결과
-- [pc-speck.md](references/pc-speck.md) — 개발 머신 하드웨어 스펙
-- [detection-metrics.md](references/detection-metrics.md) — Object Detection 평가 수치 가이드
-- [models-and-datasets.md](references/models-and-datasets.md) — 모델 및 데이터셋 현황
 
 ## report/ — 검증 리포트
 
