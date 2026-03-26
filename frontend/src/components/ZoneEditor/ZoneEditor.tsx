@@ -207,25 +207,38 @@ export const ZoneEditor = forwardRef<ZoneEditorHandle, Props>(function ZoneEdito
     fc.requestRenderAll();
   }, [canvasWidth, canvasHeight, cancelDrawing, onZoneCreated]);
 
-  // canvas 클릭/마우스 이벤트 (drawing 모드)
+  // 네이티브 DOM 좌표 → Fabric canvas 좌표 변환
+  const toCanvasPoint = useCallback((e: MouseEvent): { x: number; y: number } | null => {
+    const fc = fabricCanvasRef.current;
+    if (!fc) return null;
+    const el = fc.upperCanvasEl ?? fc.lowerCanvasEl;
+    if (!el) return null;
+    const rect = el.getBoundingClientRect();
+    return {
+      x: ((e.clientX - rect.left) / rect.width) * fc.width,
+      y: ((e.clientY - rect.top) / rect.height) * fc.height,
+    };
+  }, []);
+
+  // drawing 모드: 네이티브 DOM 이벤트로 처리 (Fabric 이벤트 간섭 방지)
   useEffect(() => {
     const fc = fabricCanvasRef.current;
     if (!fc || editorState !== "drawing") return;
 
-    const handleClick = (e: any) => {
-      if (e.e.button === 2) {
-        // 우클릭: polygon 닫기
-        e.e.preventDefault();
-        finishDrawing();
-        return;
-      }
+    const el = fc.upperCanvasEl ?? fc.lowerCanvasEl;
+    if (!el) return;
 
-      const pointer = fc.getScenePoint(e.e);
-      const point = { x: pointer.x, y: pointer.y };
+    // drawing 중 기존 zone polygon 클릭 방지
+    fc.discardActiveObject();
+    fc.getObjects().forEach((o) => {
+      o.selectable = false;
+      o.evented = false;
+    });
+
+    const addVertex = (point: { x: number; y: number }) => {
       drawingPointsRef.current.push(point);
       setVertexCount(drawingPointsRef.current.length);
 
-      // 꼭짓점 표시
       const circle = new Circle({
         left: point.x - 5,
         top: point.y - 5,
@@ -239,10 +252,9 @@ export const ZoneEditor = forwardRef<ZoneEditorHandle, Props>(function ZoneEdito
       drawingObjectsRef.current.push(circle);
       fc.add(circle);
 
-      // 이전 꼭짓점과 선 연결
-      const points = drawingPointsRef.current;
-      if (points.length >= 2) {
-        const prev = points[points.length - 2];
+      const pts = drawingPointsRef.current;
+      if (pts.length >= 2) {
+        const prev = pts[pts.length - 2];
         const line = new Line([prev.x, prev.y, point.x, point.y], {
           stroke: "#0064ff",
           strokeWidth: 2,
@@ -252,21 +264,44 @@ export const ZoneEditor = forwardRef<ZoneEditorHandle, Props>(function ZoneEdito
         drawingObjectsRef.current.push(line);
         fc.add(line);
       }
-
       fc.requestRenderAll();
     };
 
-    const handleMouseMove = (e: any) => {
-      const points = drawingPointsRef.current;
-      if (points.length === 0) return;
+    const handleMouseDown = (e: MouseEvent) => {
+      if (e.button !== 0) return; // 좌클릭만
+      const point = toCanvasPoint(e);
+      if (point) addVertex(point);
+    };
 
-      const pointer = fc.getScenePoint(e.e);
-      const last = points[points.length - 1];
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      finishDrawing();
+    };
 
-      // 점선 미리보기 업데이트
-      if (previewLineRef.current) {
-        fc.remove(previewLineRef.current);
+    const handleDblClick = (e: MouseEvent) => {
+      e.preventDefault();
+      // 더블클릭 직전 mouse:down 2회로 추가된 중복 꼭짓점 제거
+      const pts = drawingPointsRef.current;
+      const objs = drawingObjectsRef.current;
+      for (let i = 0; i < 2 && pts.length > 3; i++) {
+        pts.pop();
+        const removed = objs.pop();
+        if (removed) fc.remove(removed); // circle
+        const removedLine = objs.pop();
+        if (removedLine) fc.remove(removedLine); // line
       }
+      finishDrawing();
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const pts = drawingPointsRef.current;
+      if (pts.length === 0) return;
+      const pointer = toCanvasPoint(e);
+      if (!pointer) return;
+
+      const last = pts[pts.length - 1];
+      if (previewLineRef.current) fc.remove(previewLineRef.current);
       const preview = new Line([last.x, last.y, pointer.x, pointer.y], {
         stroke: "#0064ff",
         strokeWidth: 1,
@@ -279,22 +314,18 @@ export const ZoneEditor = forwardRef<ZoneEditorHandle, Props>(function ZoneEdito
       fc.requestRenderAll();
     };
 
-    const handleContextMenu = (e: Event) => {
-      e.preventDefault();
-    };
-
-    const canvasEl = fc.getSelectionElement();
-    canvasEl?.addEventListener("contextmenu", handleContextMenu);
-
-    fc.on("mouse:down", handleClick);
-    fc.on("mouse:move", handleMouseMove);
+    el.addEventListener("mousedown", handleMouseDown);
+    el.addEventListener("contextmenu", handleContextMenu);
+    el.addEventListener("dblclick", handleDblClick);
+    el.addEventListener("mousemove", handleMouseMove);
 
     return () => {
-      canvasEl?.removeEventListener("contextmenu", handleContextMenu);
-      fc.off("mouse:down", handleClick);
-      fc.off("mouse:move", handleMouseMove);
+      el.removeEventListener("mousedown", handleMouseDown);
+      el.removeEventListener("contextmenu", handleContextMenu);
+      el.removeEventListener("dblclick", handleDblClick);
+      el.removeEventListener("mousemove", handleMouseMove);
     };
-  }, [editorState, finishDrawing]);
+  }, [editorState, finishDrawing, toCanvasPoint]);
 
   // Esc 키: 그리기 취소
   useEffect(() => {
@@ -311,15 +342,16 @@ export const ZoneEditor = forwardRef<ZoneEditorHandle, Props>(function ZoneEdito
 
   return (
     <>
-      <canvas
-        ref={canvasElRef}
+      <div
         style={{
           position: "absolute",
           top: 0,
           left: 0,
           pointerEvents: mode === "zone-edit" ? "auto" : "none",
         }}
-      />
+      >
+        <canvas ref={canvasElRef} />
+      </div>
       {editorState === "drawing" && (
         <div
           style={{
@@ -331,9 +363,10 @@ export const ZoneEditor = forwardRef<ZoneEditorHandle, Props>(function ZoneEdito
             padding: "6px 12px",
             borderRadius: 4,
             fontSize: 13,
+            zIndex: 10,
           }}
         >
-          클릭: 꼭짓점 배치 | 우클릭: 완성 | Esc: 취소
+          클릭: 꼭짓점 배치 | 더블클릭/우클릭: 완성 | Esc: 취소
           ({vertexCount}개 꼭짓점)
         </div>
       )}

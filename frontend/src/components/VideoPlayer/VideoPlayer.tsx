@@ -40,16 +40,29 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, Props>(
     const totalFrames = videoInfo?.total_frames ?? 0;
     const currentFrame = Math.round(currentTime * fps);
 
-    // canvas 크기를 영상 비율에 맞추기
+    // canvas 크기를 영상 비율에 맞추기 (사용 가능 높이 초과 방지)
     const updateCanvasSize = useCallback(() => {
       const container = containerRef.current;
       const canvas = canvasRef.current;
       if (!container || !canvas || !videoInfo) return;
 
-      const containerWidth = container.clientWidth;
       const aspectRatio = videoInfo.height / videoInfo.width;
-      const canvasWidth = containerWidth;
-      const canvasHeight = Math.round(containerWidth * aspectRatio);
+      const maxWidth = container.clientWidth;
+
+      // .video-area 요소를 찾아 flex 레이아웃이 결정한 높이를 사용 (순환 참조 방지)
+      const videoArea = container.closest('.video-area');
+      const availableHeight = videoArea
+        ? videoArea.clientHeight - 130  // 컨트롤 + padding
+        : window.innerHeight * 0.6;
+
+      let canvasWidth = maxWidth;
+      let canvasHeight = Math.round(maxWidth * aspectRatio);
+
+      // 높이 초과 시 높이 기준으로 역산
+      if (canvasHeight > availableHeight && availableHeight > 0) {
+        canvasHeight = Math.round(availableHeight);
+        canvasWidth = Math.round(canvasHeight / aspectRatio);
+      }
 
       canvas.width = canvasWidth;
       canvas.height = canvasHeight;
@@ -59,8 +72,10 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, Props>(
       onCanvasReady?.(canvas);
     }, [videoInfo, onCanvasReady]);
 
-    // drawImage 렌더링 루프 — 실제 시간 변화가 있을 때만 state 갱신
+    // 최신 함수를 ref로 유지 (useEffect deps 오염 방지)
     const lastTimeRef = useRef(-1);
+    const updateCanvasSizeRef = useRef(updateCanvasSize);
+    updateCanvasSizeRef.current = updateCanvasSize;
 
     const renderFrame = useCallback(() => {
       const video = videoRef.current;
@@ -86,7 +101,10 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, Props>(
       }
     }, [fps, onFrameChange]);
 
-    // 영상 로드 시 canvas 세팅 + 렌더 루프 시작
+    const renderFrameRef = useRef(renderFrame);
+    renderFrameRef.current = renderFrame;
+
+    // 영상 로드 시 렌더 루프 시작 (videoUrl만 의존)
     useEffect(() => {
       const video = videoRef.current;
       if (!video || !videoUrl) return;
@@ -95,8 +113,9 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, Props>(
       video.load();
 
       const handleLoaded = () => {
-        updateCanvasSize();
-        renderFrame();
+        // videoInfo 도착 전에도 1회 시도 (이미 있으면 성공)
+        updateCanvasSizeRef.current();
+        renderFrameRef.current();
       };
 
       video.addEventListener("loadeddata", handleLoaded);
@@ -104,13 +123,21 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, Props>(
         video.removeEventListener("loadeddata", handleLoaded);
         cancelAnimationFrame(rafRef.current);
       };
-    }, [videoUrl, updateCanvasSize, renderFrame]);
+    }, [videoUrl]);
+
+    // videoInfo 도착 후 canvas 크기 재설정 + 첫 프레임 렌더
+    useEffect(() => {
+      if (!videoInfo) return;
+      updateCanvasSizeRef.current();
+      renderFrameRef.current();
+    }, [videoInfo]);
 
     // 창 리사이즈 시 canvas 크기 재조정
     useEffect(() => {
-      window.addEventListener("resize", updateCanvasSize);
-      return () => window.removeEventListener("resize", updateCanvasSize);
-    }, [updateCanvasSize]);
+      const handleResize = () => updateCanvasSizeRef.current();
+      window.addEventListener("resize", handleResize);
+      return () => window.removeEventListener("resize", handleResize);
+    }, []);
 
     // 일시정지 상태에서 canvas를 한 번 다시 그림
     const renderOnce = useCallback(() => {

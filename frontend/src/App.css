@@ -55,7 +55,7 @@
 .video-area {
   flex: 1;
   padding: 8px;
-  overflow: auto;
+  overflow: hidden;
 }
 
 .side-panel {
