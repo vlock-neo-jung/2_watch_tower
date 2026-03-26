@@ -160,23 +160,32 @@ function App() {
   // Zone 설정 저장
   const handleSaveConfig = useCallback(
     async (configName: string) => {
-      const config: ZoneConfig = { zones };
-      await saveZoneConfig(configName, config);
-      const updated = await fetchZoneConfigs();
-      setZoneConfigs(updated);
-      setSelectedConfig(configName);
+      try {
+        const config: ZoneConfig = { zones };
+        await saveZoneConfig(configName, config);
+        const updated = await fetchZoneConfigs();
+        setZoneConfigs(updated);
+        setSelectedConfig(configName);
+        showStatus("설정 저장 완료");
+      } catch (e) {
+        showStatus(`설정 저장 실패: ${e instanceof Error ? e.message : "알 수 없는 오류"}`);
+      }
     },
-    [zones]
+    [zones, showStatus]
   );
 
   // Zone 설정 로드
   const handleLoadConfig = useCallback(async (configName: string) => {
     if (!configName) return;
-    const config = await fetchZoneConfig(configName);
-    setZones(config.zones);
-    setSelectedConfig(configName);
-    setSelectedZoneId(null);
-  }, []);
+    try {
+      const config = await fetchZoneConfig(configName);
+      setZones(config.zones);
+      setSelectedConfig(configName);
+      setSelectedZoneId(null);
+    } catch (e) {
+      showStatus(`설정 로드 실패: ${e instanceof Error ? e.message : "알 수 없는 오류"}`);
+    }
+  }, [showStatus]);
 
   // 이벤트 추가/삭제
   const handleAddEvent = useCallback((event: AnnotationEvent) => {
@@ -196,18 +205,22 @@ function App() {
 
   const handleSaveGTConfirm = useCallback(async () => {
     if (!selectedVideo || !videoInfo || !gtSaveName.trim()) return;
-    const data: AnnotationData = {
-      video: selectedVideo,
-      video_fps: videoInfo.fps,
-      video_width: videoInfo.width,
-      video_height: videoInfo.height,
-      total_frames: videoInfo.total_frames,
-      zones,
-      events,
-    };
-    await saveAnnotation(gtSaveName.trim(), data);
-    setGtSaveMode(false);
-    showStatus("GT 저장 완료");
+    try {
+      const data: AnnotationData = {
+        video: selectedVideo,
+        video_fps: videoInfo.fps,
+        video_width: videoInfo.width,
+        video_height: videoInfo.height,
+        total_frames: videoInfo.total_frames,
+        zones,
+        events,
+      };
+      await saveAnnotation(gtSaveName.trim(), data);
+      setGtSaveMode(false);
+      showStatus("GT 저장 완료");
+    } catch (e) {
+      showStatus(`GT 저장 실패: ${e instanceof Error ? e.message : "알 수 없는 오류"}`);
+    }
   }, [selectedVideo, videoInfo, zones, events, gtSaveName, showStatus]);
 
   // GT 로드: 파일 목록 fetch → 선택 모드
@@ -223,11 +236,15 @@ function App() {
 
   const handleLoadGTSelect = useCallback(async (name: string) => {
     if (!name) return;
-    const data = await fetchAnnotation(name);
-    setEvents(data.events);
-    if (data.zones) setZones(data.zones);
-    setGtLoadMode(false);
-    showStatus(`GT 로드 완료: ${name}`);
+    try {
+      const data = await fetchAnnotation(name);
+      setEvents(data.events);
+      if (data.zones) setZones(data.zones);
+      setGtLoadMode(false);
+      showStatus(`GT 로드 완료: ${name}`);
+    } catch (e) {
+      showStatus(`GT 로드 실패: ${e instanceof Error ? e.message : "알 수 없는 오류"}`);
+    }
   }, [showStatus]);
 
   // seek to frame

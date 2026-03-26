@@ -12,6 +12,8 @@ from watch_tower.config import SAMPLES_DIR
 
 router = APIRouter()
 
+VIDEO_EXTENSIONS = ("*.mp4", "*.avi", "*.mkv", "*.mov", "*.webm")
+
 
 class VideoInfo(BaseModel):
     filename: str
@@ -26,7 +28,10 @@ class VideoInfo(BaseModel):
 def list_videos() -> list[str]:
     if not SAMPLES_DIR.exists():
         return []
-    return sorted(f.name for f in SAMPLES_DIR.glob("*.mp4"))
+    files: set[str] = set()
+    for ext in VIDEO_EXTENSIONS:
+        files.update(f.name for f in SAMPLES_DIR.glob(ext))
+    return sorted(files)
 
 
 @router.get("/{filename}")

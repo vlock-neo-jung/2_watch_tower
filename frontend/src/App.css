@@ -60,10 +60,17 @@
 
 .side-panel {
   width: 220px;
+  min-width: 160px;
   padding: 12px;
   border-left: 1px solid #333;
   background: #1a1a1a;
   overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .side-panel {
+    width: 160px;
+  }
 }
 
 .side-panel h3 {

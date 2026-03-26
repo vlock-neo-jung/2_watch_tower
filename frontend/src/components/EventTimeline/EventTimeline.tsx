@@ -45,7 +45,6 @@ export function EventTimeline({
       if (zones.length === 1) {
         zoneId = zones[0].zone_id;
       } else {
-        alert("zone을 선택하세요");
         return;
       }
     }
@@ -57,10 +56,14 @@ export function EventTimeline({
   const handleEndMark = () => {
     if (markingStart === null || !markingZoneId) return;
 
+    const start = Math.min(markingStart, currentFrame);
+    const end = Math.max(markingStart, currentFrame);
+    if (start === end) return;
+
     onAddEvent({
       zone_id: markingZoneId,
-      start_frame: markingStart,
-      end_frame: currentFrame,
+      start_frame: start,
+      end_frame: end,
     });
 
     setMarkingStart(null);

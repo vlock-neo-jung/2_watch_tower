@@ -35,6 +35,7 @@ export const ZoneEditor = forwardRef<ZoneEditorHandle, Props>(function ZoneEdito
   const fabricCanvasRef = useRef<Canvas | null>(null);
   const canvasElRef = useRef<HTMLCanvasElement>(null);
   const [editorState, setEditorState] = useState<EditorState>("idle");
+  const [vertexCount, setVertexCount] = useState(0);
   const drawingPointsRef = useRef<{ x: number; y: number }[]>([]);
   const drawingObjectsRef = useRef<FabricObject[]>([]);
   const previewLineRef = useRef<Line | null>(null);
@@ -167,6 +168,7 @@ export const ZoneEditor = forwardRef<ZoneEditorHandle, Props>(function ZoneEdito
     drawingPointsRef.current = [];
     drawingObjectsRef.current = [];
     previewLineRef.current = null;
+    setVertexCount(0);
     setEditorState("idle");
     fc.requestRenderAll();
   }, []);
@@ -198,6 +200,7 @@ export const ZoneEditor = forwardRef<ZoneEditorHandle, Props>(function ZoneEdito
     drawingPointsRef.current = [];
     drawingObjectsRef.current = [];
     previewLineRef.current = null;
+    setVertexCount(0);
     setEditorState("idle");
 
     onZoneCreated(normalizedPoints);
@@ -220,6 +223,7 @@ export const ZoneEditor = forwardRef<ZoneEditorHandle, Props>(function ZoneEdito
       const pointer = fc.getScenePoint(e.e);
       const point = { x: pointer.x, y: pointer.y };
       drawingPointsRef.current.push(point);
+      setVertexCount(drawingPointsRef.current.length);
 
       // 꼭짓점 표시
       const circle = new Circle({
@@ -330,7 +334,7 @@ export const ZoneEditor = forwardRef<ZoneEditorHandle, Props>(function ZoneEdito
           }}
         >
           클릭: 꼭짓점 배치 | 우클릭: 완성 | Esc: 취소
-          ({drawingPointsRef.current.length}개 꼭짓점)
+          ({vertexCount}개 꼭짓점)
         </div>
       )}
     </>

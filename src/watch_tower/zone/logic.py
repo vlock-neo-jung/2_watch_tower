@@ -141,6 +141,17 @@ class ZoneProcessor:
                 state.consecutive_frames = 0
                 state.last_exit_ms = now_ms
 
+        # stale tracker 정리: cooldown 경과한 비활성 tracker 제거
+        stale = [
+            tid for tid, s in self._states.items()
+            if not s.inside
+            and s.last_exit_ms >= 0
+            and (now_ms - s.last_exit_ms) >= self.zone_def.cooldown_ms
+            and tid not in current_tids
+        ]
+        for tid in stale:
+            del self._states[tid]
+
         self._frame_idx += 1
         return events
 
