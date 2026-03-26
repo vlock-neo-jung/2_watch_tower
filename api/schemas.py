@@ -1,1 +1,8 @@
-"""API 전용 Pydantic 스키마 (필요 시 확장)."""
+"""API 공통 Pydantic 스키마."""
+
+from pydantic import BaseModel
+
+
+class StatusResponse(BaseModel):
+    status: str
+    path: str

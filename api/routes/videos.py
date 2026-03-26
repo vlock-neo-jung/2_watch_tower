@@ -56,8 +56,11 @@ def get_video_info(filename: str) -> VideoInfo:
             capture_output=True,
             text=True,
             check=True,
+            timeout=30,
         )
         probe = json.loads(result.stdout)
+    except subprocess.TimeoutExpired:
+        raise HTTPException(status_code=504, detail=f"ffprobe 타임아웃: {filename}")
     except (subprocess.CalledProcessError, FileNotFoundError) as e:
         raise HTTPException(status_code=500, detail=f"ffprobe 실행 실패: {e}")
 

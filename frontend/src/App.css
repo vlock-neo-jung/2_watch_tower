@@ -83,3 +83,28 @@
   color: #666;
   font-size: 13px;
 }
+
+.header-inline {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.header-inline input,
+.header-inline select {
+  padding: 5px 8px;
+  background: #2a2a3e;
+  color: #eee;
+  border: 1px solid #555;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.status-msg {
+  margin-left: 8px;
+  padding: 4px 10px;
+  background: #2d4a2d;
+  color: #8f8;
+  border-radius: 4px;
+  font-size: 12px;
+}

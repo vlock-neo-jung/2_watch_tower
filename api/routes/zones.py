@@ -1,8 +1,8 @@
 """Zone 설정 CRUD API."""
 
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
 
+from api.schemas import StatusResponse
 from api.utils import safe_path
 from watch_tower.config import DATA_ROOT
 from watch_tower.zone import ZoneConfig, load_zone_config, save_zone_config
@@ -10,11 +10,6 @@ from watch_tower.zone import ZoneConfig, load_zone_config, save_zone_config
 router = APIRouter()
 
 ZONES_DIR = DATA_ROOT / "configs" / "zones"
-
-
-class StatusResponse(BaseModel):
-    status: str
-    path: str
 
 
 @router.get("/", response_model=list[str])
@@ -37,4 +32,13 @@ def save_zone_config_api(config_name: str, config: ZoneConfig) -> StatusResponse
     ZONES_DIR.mkdir(parents=True, exist_ok=True)
     path = safe_path(ZONES_DIR, config_name)
     save_zone_config(config, path)
+    return StatusResponse(status="ok", path=str(path))
+
+
+@router.delete("/{config_name}", response_model=StatusResponse)
+def delete_zone_config(config_name: str) -> StatusResponse:
+    path = safe_path(ZONES_DIR, config_name)
+    if not path.exists():
+        raise HTTPException(status_code=404, detail=f"설정 파일 없음: {config_name}")
+    path.unlink()
     return StatusResponse(status="ok", path=str(path))

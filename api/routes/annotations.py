@@ -5,24 +5,32 @@ import json
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
+from api.schemas import StatusResponse
 from api.utils import safe_path
 from watch_tower.config import DATA_ROOT
+from watch_tower.zone.models import ZoneDefinition
 
 router = APIRouter()
 
 GT_DIR = DATA_ROOT / "zone_gt"
 
 
-class AnnotationData(BaseModel, extra="allow"):
-    """GT JSON. video, events 필드 필수. 나머지 필드는 유연하게 허용."""
+class AnnotationEvent(BaseModel):
+    zone_id: str
+    start_frame: int
+    end_frame: int
+
+
+class AnnotationData(BaseModel):
+    """GT JSON. 프론트엔드 AnnotationData 타입과 1:1 대응."""
 
     video: str
-    events: list[dict]
-
-
-class StatusResponse(BaseModel):
-    status: str
-    path: str
+    video_fps: float
+    video_width: int
+    video_height: int
+    total_frames: int
+    zones: list[ZoneDefinition]
+    events: list[AnnotationEvent]
 
 
 @router.get("/", response_model=list[str])

@@ -16,7 +16,7 @@ PPE-Person 매핑:
 import numpy as np
 import supervision as sv
 
-from watch_tower.ppe.models import PPEClass, PPEViolationEvent, ZonePPERule
+from watch_tower.ppe.models import PPE_CLASS_PAIRS, PPEClass, PPEViolationEvent, ZonePPERule
 
 
 def _xyxy_contains_point(xyxy: np.ndarray, point: np.ndarray) -> bool:
@@ -124,11 +124,7 @@ class PPEViolationProcessor:
 
             missing: list[PPEClass] = []
             for req in self.rule.required_ppe:
-                neg_cls_map = {
-                    PPEClass.HARDHAT: PPEClass.NO_HARDHAT,
-                    PPEClass.SAFETY_VEST: PPEClass.NO_SAFETY_VEST,
-                }
-                neg_cls = neg_cls_map.get(req)
+                neg_cls = PPE_CLASS_PAIRS.get(req)
 
                 # 명시적 미착용 탐지 (confidence=1.0)
                 if neg_cls is not None and neg_cls in assigned:
@@ -142,10 +138,7 @@ class PPEViolationProcessor:
             if missing:
                 # 명시적 NO-* 탐지가 있으면 confidence=1.0
                 has_explicit = any(
-                    {
-                        PPEClass.HARDHAT: PPEClass.NO_HARDHAT,
-                        PPEClass.SAFETY_VEST: PPEClass.NO_SAFETY_VEST,
-                    }.get(m) in assigned
+                    PPE_CLASS_PAIRS.get(m) in assigned
                     for m in missing
                 )
                 events.append(PPEViolationEvent(

@@ -1,9 +1,15 @@
-import { useRef, useEffect, useCallback, useState } from "react";
+import { useRef, useEffect, useCallback, useState, forwardRef, useImperativeHandle } from "react";
 import { Canvas, Polygon, Circle, Line, controlsUtils, FabricObject } from "fabric";
 import type { ZoneDefinition } from "../../types";
 import { ZONE_COLORS, ZONE_BORDER_COLORS } from "../../types";
 
 type EditorState = "idle" | "drawing" | "editing";
+
+const zoneIdMap = new WeakMap<FabricObject, string>();
+
+export interface ZoneEditorHandle {
+  startDrawing: () => void;
+}
 
 interface Props {
   canvasWidth: number;
@@ -11,28 +17,24 @@ interface Props {
   zones: ZoneDefinition[];
   selectedZoneId: string | null;
   mode: "zone-edit" | "annotation";
-  startDrawing?: boolean;
   onZoneCreated: (points: number[][]) => void;
   onZoneUpdated: (zoneId: string, points: number[][]) => void;
   onZoneSelected: (zoneId: string | null) => void;
 }
 
-export function ZoneEditor({
+export const ZoneEditor = forwardRef<ZoneEditorHandle, Props>(function ZoneEditor({
   canvasWidth,
   canvasHeight,
   zones,
   selectedZoneId,
   mode,
-  startDrawing: startDrawingProp = false,
   onZoneCreated,
   onZoneUpdated,
   onZoneSelected,
-}: Props) {
+}, ref) {
   const fabricCanvasRef = useRef<Canvas | null>(null);
   const canvasElRef = useRef<HTMLCanvasElement>(null);
-  const [editorState, setEditorState] = useState<EditorState>(
-    startDrawingProp ? "drawing" : "idle"
-  );
+  const [editorState, setEditorState] = useState<EditorState>("idle");
   const drawingPointsRef = useRef<{ x: number; y: number }[]>([]);
   const drawingObjectsRef = useRef<FabricObject[]>([]);
   const previewLineRef = useRef<Line | null>(null);
@@ -62,7 +64,7 @@ export function ZoneEditor({
     if (!fc) return;
 
     // 기존 polygon 제거 (drawing 오브젝트 제외)
-    const toRemove = fc.getObjects().filter((o) => (o as any).__zoneId);
+    const toRemove = fc.getObjects().filter((o) => zoneIdMap.has(o));
     toRemove.forEach((o) => fc.remove(o));
 
     // zone polygon 추가
@@ -91,7 +93,7 @@ export function ZoneEditor({
         evented: mode === "zone-edit",
       });
 
-      (poly as any).__zoneId = zone.zone_id;
+      zoneIdMap.set(poly, zone.zone_id);
 
       if (isSelected && mode === "zone-edit") {
         poly.controls = controlsUtils.createPolyControls(poly);
@@ -110,8 +112,9 @@ export function ZoneEditor({
 
     const handleSelected = (e: any) => {
       const target = e.selected?.[0];
-      if (target && (target as any).__zoneId) {
-        onZoneSelected((target as any).__zoneId);
+      const zoneId = target && zoneIdMap.get(target);
+      if (zoneId) {
+        onZoneSelected(zoneId);
       }
     };
 
@@ -123,9 +126,8 @@ export function ZoneEditor({
 
     const handleModified = (e: any) => {
       const target = e.target;
-      if (!target || !(target as any).__zoneId) return;
-
-      const zoneId = (target as any).__zoneId as string;
+      const zoneId = target && zoneIdMap.get(target);
+      if (!zoneId) return;
       const poly = target as Polygon;
       const matrix = poly.calcTransformMatrix();
 
@@ -168,6 +170,13 @@ export function ZoneEditor({
     setEditorState("idle");
     fc.requestRenderAll();
   }, []);
+
+  useImperativeHandle(ref, () => ({
+    startDrawing: () => {
+      cancelDrawing();
+      setEditorState("drawing");
+    },
+  }), [cancelDrawing]);
 
   const finishDrawing = useCallback(() => {
     const fc = fabricCanvasRef.current;
@@ -326,7 +335,6 @@ export function ZoneEditor({
       )}
     </>
   );
-}
+});
 
-// 외부에서 Drawing 시작을 호출할 수 있도록 export
 export { type EditorState };

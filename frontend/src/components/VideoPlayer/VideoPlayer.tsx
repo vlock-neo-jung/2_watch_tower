@@ -40,19 +40,6 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, Props>(
     const totalFrames = videoInfo?.total_frames ?? 0;
     const currentFrame = Math.round(currentTime * fps);
 
-    useImperativeHandle(ref, () => ({
-      getCurrentFrame: () => Math.round((videoRef.current?.currentTime ?? 0) * fps),
-      seekToFrame: (frame: number) => {
-        if (videoRef.current) {
-          videoRef.current.currentTime = frame / fps;
-        }
-      },
-      getCanvasSize: () => ({
-        width: canvasRef.current?.width ?? 0,
-        height: canvasRef.current?.height ?? 0,
-      }),
-    }));
-
     // canvas 크기를 영상 비율에 맞추기
     const updateCanvasSize = useCallback(() => {
       const container = containerRef.current;
@@ -72,7 +59,9 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, Props>(
       onCanvasReady?.(canvas);
     }, [videoInfo, onCanvasReady]);
 
-    // drawImage 렌더링 루프
+    // drawImage 렌더링 루프 — 실제 시간 변화가 있을 때만 state 갱신
+    const lastTimeRef = useRef(-1);
+
     const renderFrame = useCallback(() => {
       const video = videoRef.current;
       const canvas = canvasRef.current;
@@ -85,10 +74,16 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, Props>(
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
       }
 
-      setCurrentTime(video.currentTime);
-      onFrameChange?.(Math.round(video.currentTime * fps));
+      const t = video.currentTime;
+      if (t !== lastTimeRef.current) {
+        lastTimeRef.current = t;
+        setCurrentTime(t);
+        onFrameChange?.(Math.round(t * fps));
+      }
 
-      rafRef.current = requestAnimationFrame(renderFrame);
+      if (!video.paused) {
+        rafRef.current = requestAnimationFrame(renderFrame);
+      }
     }, [fps, onFrameChange]);
 
     // 영상 로드 시 canvas 세팅 + 렌더 루프 시작
@@ -117,6 +112,26 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, Props>(
       return () => window.removeEventListener("resize", updateCanvasSize);
     }, [updateCanvasSize]);
 
+    // 일시정지 상태에서 canvas를 한 번 다시 그림
+    const renderOnce = useCallback(() => {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = requestAnimationFrame(renderFrame);
+    }, [renderFrame]);
+
+    useImperativeHandle(ref, () => ({
+      getCurrentFrame: () => Math.round((videoRef.current?.currentTime ?? 0) * fps),
+      seekToFrame: (frame: number) => {
+        if (videoRef.current) {
+          videoRef.current.currentTime = frame / fps;
+          renderOnce();
+        }
+      },
+      getCanvasSize: () => ({
+        width: canvasRef.current?.width ?? 0,
+        height: canvasRef.current?.height ?? 0,
+      }),
+    }));
+
     // 재생/일시정지
     const togglePlay = useCallback(() => {
       const video = videoRef.current;
@@ -124,11 +139,12 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, Props>(
       if (video.paused) {
         video.play();
         setPlaying(true);
+        rafRef.current = requestAnimationFrame(renderFrame);
       } else {
         video.pause();
         setPlaying(false);
       }
-    }, []);
+    }, [renderFrame]);
 
     // 프레임 이동
     const stepFrame = useCallback(
@@ -138,8 +154,9 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, Props>(
         video.pause();
         setPlaying(false);
         video.currentTime = Math.max(0, Math.min(video.currentTime + delta / fps, duration));
+        renderOnce();
       },
-      [fps, duration]
+      [fps, duration, renderOnce]
     );
 
     // 5초 점프
@@ -148,8 +165,9 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, Props>(
         const video = videoRef.current;
         if (!video) return;
         video.currentTime = Math.max(0, Math.min(video.currentTime + seconds, duration));
+        renderOnce();
       },
-      [duration]
+      [duration, renderOnce]
     );
 
     // 시간 슬라이더
@@ -158,8 +176,9 @@ export const VideoPlayer = forwardRef<VideoPlayerHandle, Props>(
         const video = videoRef.current;
         if (!video) return;
         video.currentTime = parseFloat(e.target.value);
+        renderOnce();
       },
-      []
+      [renderOnce]
     );
 
     // 재생 속도

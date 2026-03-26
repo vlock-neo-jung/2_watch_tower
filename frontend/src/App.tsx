@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { VideoPlayer } from "./components/VideoPlayer";
 import type { VideoPlayerHandle } from "./components/VideoPlayer";
 import { ZoneEditor } from "./components/ZoneEditor";
+import type { ZoneEditorHandle } from "./components/ZoneEditor";
 import { ZonePanel } from "./components/ZonePanel";
 import { EventTimeline } from "./components/EventTimeline";
 import {
@@ -26,8 +27,6 @@ import type {
 } from "./types";
 import "./App.css";
 
-let zoneIdCounter = 0;
-
 function App() {
   // 영상 상태
   const [videos, setVideos] = useState<string[]>([]);
@@ -49,10 +48,21 @@ function App() {
 
   // refs
   const playerRef = useRef<VideoPlayerHandle>(null);
+  const zoneEditorRef = useRef<ZoneEditorHandle>(null);
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 });
 
-  // 시작할 drawing 상태를 ZoneEditor에 전달하기 위한 트리거
-  const [drawingTrigger, setDrawingTrigger] = useState(0);
+  // GT 저장/로드 UI 상태
+  const [gtSaveMode, setGtSaveMode] = useState(false);
+  const [gtSaveName, setGtSaveName] = useState("");
+  const [gtFiles, setGtFiles] = useState<string[]>([]);
+  const [gtLoadMode, setGtLoadMode] = useState(false);
+  const [statusMsg, setStatusMsg] = useState<string | null>(null);
+
+  const showStatus = useCallback((msg: string) => {
+    setStatusMsg(msg);
+    setTimeout(() => setStatusMsg(null), 3000);
+  }, []);
+
   const [pendingZoneMeta, setPendingZoneMeta] = useState<{
     name: string;
     type: "danger" | "warning" | "entry";
@@ -85,7 +95,7 @@ function App() {
   const handleAddZone = useCallback(
     (name: string, type: "danger" | "warning" | "entry") => {
       setPendingZoneMeta({ name, type });
-      setDrawingTrigger((t) => t + 1);
+      zoneEditorRef.current?.startDrawing();
     },
     []
   );
@@ -96,7 +106,7 @@ function App() {
       const meta = pendingZoneMeta;
       if (!meta) return;
 
-      const zoneId = `zone_${++zoneIdCounter}_${Date.now()}`;
+      const zoneId = `zone_${crypto.randomUUID().slice(0, 8)}`;
       const closedPoints = [...points, points[0]];
       const geometry: GeoJSONPolygon = {
         type: "Polygon",
@@ -177,15 +187,15 @@ function App() {
     setEvents((prev) => prev.filter((_, i) => i !== index));
   }, []);
 
-  // GT 저장
-  const handleSaveGT = useCallback(async () => {
-    if (!selectedVideo || !videoInfo) return;
-    const name = prompt(
-      "GT 파일명 (예: gt_test.json)",
-      `gt_${selectedVideo.replace(".mp4", "")}.json`
-    );
-    if (!name) return;
+  // GT 저장: 인라인 입력 모드 토글
+  const handleSaveGTStart = useCallback(() => {
+    if (!selectedVideo) return;
+    setGtSaveName(`gt_${selectedVideo.replace(".mp4", "")}.json`);
+    setGtSaveMode(true);
+  }, [selectedVideo]);
 
+  const handleSaveGTConfirm = useCallback(async () => {
+    if (!selectedVideo || !videoInfo || !gtSaveName.trim()) return;
     const data: AnnotationData = {
       video: selectedVideo,
       video_fps: videoInfo.fps,
@@ -195,24 +205,30 @@ function App() {
       zones,
       events,
     };
-    await saveAnnotation(name, data);
-    alert("GT 저장 완료");
-  }, [selectedVideo, videoInfo, zones, events]);
+    await saveAnnotation(gtSaveName.trim(), data);
+    setGtSaveMode(false);
+    showStatus("GT 저장 완료");
+  }, [selectedVideo, videoInfo, zones, events, gtSaveName, showStatus]);
 
-  // GT 로드
-  const handleLoadGT = useCallback(async () => {
+  // GT 로드: 파일 목록 fetch → 선택 모드
+  const handleLoadGTStart = useCallback(async () => {
     const list = await fetchAnnotations();
     if (list.length === 0) {
-      alert("저장된 GT 파일이 없습니다");
+      showStatus("저장된 GT 파일이 없습니다");
       return;
     }
-    const name = prompt(`GT 파일 선택:\n${list.join("\n")}`);
-    if (!name || !list.includes(name)) return;
+    setGtFiles(list);
+    setGtLoadMode(true);
+  }, [showStatus]);
 
+  const handleLoadGTSelect = useCallback(async (name: string) => {
+    if (!name) return;
     const data = await fetchAnnotation(name);
     setEvents(data.events);
     if (data.zones) setZones(data.zones);
-  }, []);
+    setGtLoadMode(false);
+    showStatus(`GT 로드 완료: ${name}`);
+  }, [showStatus]);
 
   // seek to frame
   const handleSeekToFrame = useCallback(
@@ -250,14 +266,47 @@ function App() {
 
           {mode === "annotation" && (
             <>
-              <button onClick={handleSaveGT} className="header-btn">
-                GT 저장
-              </button>
-              <button onClick={handleLoadGT} className="header-btn">
-                GT 불러오기
-              </button>
+              {gtSaveMode ? (
+                <span className="header-inline">
+                  <input
+                    value={gtSaveName}
+                    onChange={(e) => setGtSaveName(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSaveGTConfirm()}
+                    placeholder="파일명.json"
+                    autoFocus
+                  />
+                  <button onClick={handleSaveGTConfirm} className="header-btn">확인</button>
+                  <button onClick={() => setGtSaveMode(false)} className="header-btn">취소</button>
+                </span>
+              ) : (
+                <button onClick={handleSaveGTStart} className="header-btn">
+                  GT 저장
+                </button>
+              )}
+
+              {gtLoadMode ? (
+                <span className="header-inline">
+                  <select
+                    onChange={(e) => handleLoadGTSelect(e.target.value)}
+                    defaultValue=""
+                    autoFocus
+                  >
+                    <option value="" disabled>파일 선택...</option>
+                    {gtFiles.map((f) => (
+                      <option key={f} value={f}>{f}</option>
+                    ))}
+                  </select>
+                  <button onClick={() => setGtLoadMode(false)} className="header-btn">취소</button>
+                </span>
+              ) : (
+                <button onClick={handleLoadGTStart} className="header-btn">
+                  GT 불러오기
+                </button>
+              )}
             </>
           )}
+
+          {statusMsg && <span className="status-msg">{statusMsg}</span>}
         </div>
       </header>
 
@@ -272,16 +321,15 @@ function App() {
               onFrameChange={handleFrameChange}
             />
             <ZoneEditor
+              ref={zoneEditorRef}
               canvasWidth={canvasSize.width}
               canvasHeight={canvasSize.height}
               zones={zones}
               selectedZoneId={selectedZoneId}
               mode={mode}
-              startDrawing={pendingZoneMeta !== null}
               onZoneCreated={handleZoneCreated}
               onZoneUpdated={handleZoneUpdated}
               onZoneSelected={setSelectedZoneId}
-              key={drawingTrigger}
             />
           </div>
         </div>
