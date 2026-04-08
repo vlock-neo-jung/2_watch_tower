@@ -106,7 +106,7 @@ function App() {
       const meta = pendingZoneMeta;
       if (!meta) return;
 
-      const zoneId = `zone_${crypto.randomUUID().slice(0, 8)}`;
+      const zoneId = `zone_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`;
       const closedPoints = [...points, points[0]];
       const geometry: GeoJSONPolygon = {
         type: "Polygon",

@@ -207,26 +207,26 @@ export const ZoneEditor = forwardRef<ZoneEditorHandle, Props>(function ZoneEdito
     fc.requestRenderAll();
   }, [canvasWidth, canvasHeight, cancelDrawing, onZoneCreated]);
 
-  // 네이티브 DOM 좌표 → Fabric canvas 좌표 변환
+  // 투명 오버레이 ref — drawing 모드에서 Fabric 위에 올려 이벤트를 가로챔
+  const overlayRef = useRef<HTMLDivElement>(null);
+
+  // 오버레이 좌표 → Fabric canvas 좌표 변환
   const toCanvasPoint = useCallback((e: MouseEvent): { x: number; y: number } | null => {
     const fc = fabricCanvasRef.current;
-    if (!fc) return null;
-    const el = fc.upperCanvasEl ?? fc.lowerCanvasEl;
-    if (!el) return null;
-    const rect = el.getBoundingClientRect();
+    const overlay = overlayRef.current;
+    if (!fc || !overlay) return null;
+    const rect = overlay.getBoundingClientRect();
     return {
       x: ((e.clientX - rect.left) / rect.width) * fc.width,
       y: ((e.clientY - rect.top) / rect.height) * fc.height,
     };
   }, []);
 
-  // drawing 모드: 네이티브 DOM 이벤트로 처리 (Fabric 이벤트 간섭 방지)
+  // drawing 모드: 투명 오버레이에 이벤트 리스너 부착 (Fabric 간섭 완전 차단)
   useEffect(() => {
     const fc = fabricCanvasRef.current;
-    if (!fc || editorState !== "drawing") return;
-
-    const el = fc.upperCanvasEl ?? fc.lowerCanvasEl;
-    if (!el) return;
+    const overlay = overlayRef.current;
+    if (!fc || !overlay || editorState !== "drawing") return;
 
     // drawing 중 기존 zone polygon 클릭 방지
     fc.discardActiveObject();
@@ -268,7 +268,9 @@ export const ZoneEditor = forwardRef<ZoneEditorHandle, Props>(function ZoneEdito
     };
 
     const handleMouseDown = (e: MouseEvent) => {
-      if (e.button !== 0) return; // 좌클릭만
+      if (e.button !== 0) return;
+      e.preventDefault();
+      e.stopPropagation();
       const point = toCanvasPoint(e);
       if (point) addVertex(point);
     };
@@ -281,15 +283,15 @@ export const ZoneEditor = forwardRef<ZoneEditorHandle, Props>(function ZoneEdito
 
     const handleDblClick = (e: MouseEvent) => {
       e.preventDefault();
-      // 더블클릭 직전 mouse:down 2회로 추가된 중복 꼭짓점 제거
+      e.stopPropagation();
       const pts = drawingPointsRef.current;
       const objs = drawingObjectsRef.current;
       for (let i = 0; i < 2 && pts.length > 3; i++) {
         pts.pop();
         const removed = objs.pop();
-        if (removed) fc.remove(removed); // circle
+        if (removed) fc.remove(removed);
         const removedLine = objs.pop();
-        if (removedLine) fc.remove(removedLine); // line
+        if (removedLine) fc.remove(removedLine);
       }
       finishDrawing();
     };
@@ -314,16 +316,16 @@ export const ZoneEditor = forwardRef<ZoneEditorHandle, Props>(function ZoneEdito
       fc.requestRenderAll();
     };
 
-    el.addEventListener("mousedown", handleMouseDown);
-    el.addEventListener("contextmenu", handleContextMenu);
-    el.addEventListener("dblclick", handleDblClick);
-    el.addEventListener("mousemove", handleMouseMove);
+    overlay.addEventListener("mousedown", handleMouseDown);
+    overlay.addEventListener("contextmenu", handleContextMenu);
+    overlay.addEventListener("dblclick", handleDblClick);
+    overlay.addEventListener("mousemove", handleMouseMove);
 
     return () => {
-      el.removeEventListener("mousedown", handleMouseDown);
-      el.removeEventListener("contextmenu", handleContextMenu);
-      el.removeEventListener("dblclick", handleDblClick);
-      el.removeEventListener("mousemove", handleMouseMove);
+      overlay.removeEventListener("mousedown", handleMouseDown);
+      overlay.removeEventListener("contextmenu", handleContextMenu);
+      overlay.removeEventListener("dblclick", handleDblClick);
+      overlay.removeEventListener("mousemove", handleMouseMove);
     };
   }, [editorState, finishDrawing, toCanvasPoint]);
 
@@ -353,22 +355,38 @@ export const ZoneEditor = forwardRef<ZoneEditorHandle, Props>(function ZoneEdito
         <canvas ref={canvasElRef} />
       </div>
       {editorState === "drawing" && (
-        <div
-          style={{
-            position: "absolute",
-            top: 8,
-            left: 8,
-            background: "rgba(0,0,0,0.7)",
-            color: "#fff",
-            padding: "6px 12px",
-            borderRadius: 4,
-            fontSize: 13,
-            zIndex: 10,
-          }}
-        >
-          클릭: 꼭짓점 배치 | 더블클릭/우클릭: 완성 | Esc: 취소
-          ({vertexCount}개 꼭짓점)
-        </div>
+        <>
+          {/* 투명 오버레이: Fabric 위에서 모든 마우스 이벤트를 가로챔 */}
+          <div
+            ref={overlayRef}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: canvasWidth,
+              height: canvasHeight,
+              cursor: "crosshair",
+              zIndex: 5,
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              top: 8,
+              left: 8,
+              background: "rgba(0,0,0,0.7)",
+              color: "#fff",
+              padding: "6px 12px",
+              borderRadius: 4,
+              fontSize: 13,
+              zIndex: 10,
+              pointerEvents: "none",
+            }}
+          >
+            클릭: 꼭짓점 배치 | 더블클릭/우클릭: 완성 | Esc: 취소
+            ({vertexCount}개 꼭짓점)
+          </div>
+        </>
       )}
     </>
   );

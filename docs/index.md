@@ -7,6 +7,7 @@
 ## product/ — 제품 오버뷰, 핵심 도메인 규칙
 
 - [overview.md](product/overview.md) — 프로젝트 개요 및 요구사항 정의서
+- [zone-tool-manual.md](product/zone-tool-manual.md) — Zone Tool 사용자 매뉴얼 (Zone 설정 및 어노테이션)
 
 ## references/ — 아키텍처, 인프라, 셋업, API 등 개발자 참고 문서
 
@@ -28,6 +29,7 @@
 - [realtime-pipeline.md](research/realtime-pipeline.md) — 실시간 파이프라인 설계
 - [video-streaming-framework.md](research/video-streaming-framework.md) — 영상 스트리밍 프레임워크 비교
 - [comparison-recommendation.md](research/comparison-recommendation.md) — 상용 솔루션 비교 및 Build vs Buy
+- [camera-distance-angle-ppe-detection.md](research/camera-distance-angle-ppe-detection.md) — PPE 감지를 위한 최적 카메라 거리 및 각도 리서치
 - [research_01.md](research/research_01.md) — 리서치 노트 1
 - [research_02.md](research/research_02.md) — 리서치 노트 2
 
